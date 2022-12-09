@@ -1,0 +1,2 @@
+
+-DCATKIN_DEVEL_PREFIX=/home/khadijaswelam/Desktop/Robotics_Project/Cognitive-Robotics/devel -DCMAKE_INSTALL_PREFIX=/home/khadijaswelam/Desktop/Robotics_Project/Cognitive-Robotics/install -G Unix Makefiles
