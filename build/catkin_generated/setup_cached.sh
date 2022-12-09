@@ -7,7 +7,5 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/khadijaswelam/Desktop/Robotics_Project/Cognitive-Robotics/devel:$CMAKE_PREFIX_PATH"
+export LD_LIBRARY_PATH='/home/khadijaswelam/catkin_ws/devel/lib:/opt/ros/noetic/lib'
 export PWD='/home/khadijaswelam/Desktop/Robotics_Project/Cognitive-Robotics/build'
-export ROSLISP_PACKAGE_DIRECTORIES="/home/khadijaswelam/Desktop/Robotics_Project/Cognitive-Robotics/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
-export ROS_PACKAGE_PATH="/home/khadijaswelam/Desktop/Robotics_Project/Cognitive-Robotics/src:$ROS_PACKAGE_PATH"

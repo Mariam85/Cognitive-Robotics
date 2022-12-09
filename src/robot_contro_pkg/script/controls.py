@@ -1,50 +1,12 @@
 #!/usr/bin/env python3
 import rospy
 
-<<<<<<< HEAD
-import keyboard
-=======
 #import keyboard
 from pynput import keyboard
->>>>>>> 7043857087c44d24f1211aaf7f1c9fd64a3bf7de
 from rospy.rostime import Time
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 
-<<<<<<< HEAD
-def main():
-    # Initialize Node with node name
-    rospy.init_node('hello_controller')
-    # Assign node as a publisher to this topic
-    pub = rospy.Publisher('/robot/robotnik_base_control/cmd_vel
-', Twist, queue_size=100)
-    # Get the current time in seconds
-    start = Time.now().to_sec()
-
-    vel_msg = Twist()
-    maxSpeed = 10
-    angularSpeed_d = 5 #degrees/sec
-    angularSpeed_r = (angularSpeed_d * 3.14) / 180 
-    
-    while not rospy.is_shutdown():
-
-        if keyboard.is_pressed('w') or keyboard.is_pressed('W') :
-            # ACCELERATE
-            if vel_msg.linear.y < maxSpeed:
-                vel_msg.linear.y += 0.5
-        
-        if keyboard.is_pressed('s') or keyboard.is_pressed('S') :
-            # DECELERATE
-            if vel_msg.linear.y > 0:
-                vel_msg.linear.y -= 0.3
-
-        if keyboard.is_pressed('a') or keyboard.is_pressed('A') :
-            # LEFT -- anticlockwise
-            vel_msg.angular.z += angularSpeed_r
-
-
-        if keyboard.is_pressed('d') or keyboard.is_pressed('D') :
-=======
 letter = 'm'
 
 def on_press(key):
@@ -97,28 +59,10 @@ def main():
         if letter =='d' or letter =='D' :
             print("enter right")
 
->>>>>>> 7043857087c44d24f1211aaf7f1c9fd64a3bf7de
             # RIGHT -- clockwise
             vel_msg.angular.z -= angularSpeed_r
 
 
-<<<<<<< HEAD
-        if not (keyboard.is_pressed('w') or keyboard.is_pressed('W')) and not (keyboard.is_pressed('s') or keyboard.is_pressed('S')):
-            # DECELERATE WITH TIME PASSING 
-            if vel_msg.linear.y > 0:
-                vel_msg.linear.y -= 0.1
-
-
-
-        # If 5 seconds are passed
-        if Time.now().to_sec() - start >= 5:
-            msg = String()
-            start = Time.now().to_sec()
-            msg.data = 'Hello world at {}'.format(start)
-            # Broadcast the message to the topic hello_sender
-            pub.publish(msg)
-            print('msg sent')
-=======
         #if not (keyboard.is_pressed('w') or keyboard.is_pressed('W')) and not (keyboard.is_pressed('s') or keyboard.is_pressed('S')):
         if not(letter =='w' or letter =='W') and not(letter == 's' or letter == 'S') :
             # DECELERATE WITH TIME PASSING 
@@ -131,14 +75,9 @@ def main():
 
 
         pub.publish(vel_msg)
->>>>>>> 7043857087c44d24f1211aaf7f1c9fd64a3bf7de
 
 if __name__ == '__main__':
     try:
         main()
     except rospy.ROSInterruptException:
-<<<<<<< HEAD
         pass
-=======
-        pass
->>>>>>> 7043857087c44d24f1211aaf7f1c9fd64a3bf7de
