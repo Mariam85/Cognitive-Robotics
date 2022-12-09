@@ -70,6 +70,9 @@ def main():
                 vel_msg.linear.x -= 0.02
 
 
+        if not(letter =='a' or letter =='A') and not(letter == 'd' or letter == 'D') :
+            vel_msg.angular.z = 0
+
 
         pub.publish(vel_msg)
 
