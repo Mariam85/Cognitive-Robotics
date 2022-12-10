@@ -1,17 +1,12 @@
-import rospy
-import message_filters
-from rospy.rostime import Time
-from std_msgs.msg import String
-from nav_msgs.msg import Odometry
-from sensor_msgs.msg import LaserScan
-from robot_contro_pkg.msg import SensorSync
-import numpy as np
-from utils import *
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
-#import occupancy grid and occupancy grid metadata
-from nav_msgs.msg import OccupancyGrid
-from nav_msgs.msg import MapMetaData
+from tf.transformations import euler_from_quaternion
+
+import numpy as np
+
+#import the created globals file
+import globals as g
+
+#########################   SENSOR UTILS    ############################################
 
 def ThetaFromQuant(orientations):
     """
@@ -19,7 +14,7 @@ def ThetaFromQuant(orientations):
     """
     #
     xyzw = [ orientations.x, orientations.y, orientations.z, orientations.w]
-    (roll, pitch, yaw) = euler_from_quaternion(xyzw)
+    (_, _, yaw) = euler_from_quaternion(xyzw)
     if yaw < 0:
         yaw = 2 * np.pi + yaw  # from 0 to 2pi
     return yaw
@@ -34,24 +29,28 @@ def ThetaFromOdom(odom):
 
 #convert x and y to map coordinates
 def convert_to_map(x,y):
-    global metadata
-    x = int(x/metadata.resolution)
-    y = int(y/metadata.resolution)
-    return x,y
+    x = int(x/g.metadata.resolution)
+    y = int(y/g.metadata.resolution)
+
+    origin_x = int(g.metadata.height/2 - y)
+    origin_y = int(g.metadata.width/2 + x)
+     
+    return origin_x,origin_y
 
 def convert_to_map_array(xs,ys):
-    global metadata
-    xs = xs/metadata.resolution
-    ys = ys/metadata.resolution
+    xs = xs/g.metadata.resolution
+    ys = ys/g.metadata.resolution
     xs = xs.astype(int)
     ys = ys.astype(int)
-    return xs,ys
+    origin_xs = (g.metadata.height/2 - ys).astype(int)
+    origin_ys = (g.metadata.width/2 + xs).astype(int)
+
+    return origin_xs,origin_ys
 
 #convert map coordinates to x and y
 def convert_to_xy(x,y):
-    global metadata
-    x = x*metadata.resolution
-    y = y*metadata.resolution
+    x = x*g.metadata.resolution
+    y = y*g.metadata.resolution
     return x,y
 
 
@@ -99,4 +98,127 @@ def get_sensor_data_as_xy(x,y,theta,distances,thetas):
         xs = np.append(xs,x1)
         ys = np.append(ys,y1)
     return xs,ys
+
+
+
+
+#################   MAP UTILS   ###############################################
+
+
+def log_odds(p):
+    """
+    Returns log odds of p
+    """
+    return np.log(p/(1-p))
+
+def log_odds_map(map):
+    """
+    Returns log odds of map
+    """
+    logMap = np.copy(map)
+
+    for i in range(len(map)):
+        logMap[i] = log_odds(map[i])
+    return logMap
+
+def p_from_log_odds_map(log_odds_map):
+    """
+    Returns p from log odds map
+    """
+    pMap = np.copy(log_odds_map)
+
+    for i in range(len(log_odds_map)):
+        for j in range(len(log_odds_map[i])):
+            pMap[i][j] = p_from_log_odds(log_odds_map[i][j])
+    return pMap
+
+
+    
+
+def p_from_log_odds(log_odds):
+    """
+    Returns p from log odds
+    """
+    return 1/(1+np.exp(-log_odds))
+
+def update_map(x1,y1,xs,ys):
+    """
+    Updates map with laser scan
+    """
+
+    #update map with laser scan
+    for i in range(len(xs)):
+        x2 = xs[i]
+        y2 = ys[i]
+        #get all cells between laser scan and robot
+        cells = bresenham_line_algo(x1,y1,x2,y2)
+        # print(cells)
+        #update map with laser scan
+        # print("x1,y1,x2,y2",x1,y1,x2,y2)    
+        # print("x2,y2",x2,y2)
+        #set cell to occupied
+        if x2 >= 0 and x2 < g.metadata.height and y2 >= 0 and y2 < g.metadata.width:
+            # print(log_odds(g.occupied_threshold))
+            g.map_data[x2][y2] += log_odds(g.occupied_threshold)
+            # print(g.map_data[x2][y2])
+        for cell in cells:
+            x = cell[0]
+            y = cell[1]
+            #if out of bounds continue
+            if x < 0 or x >= g.metadata.height or y < 0 or y >= g.metadata.width:
+                continue
+            #set cell to free
+            g.map_data[x][y] += log_odds(g.free_threshold)
+    
+    #normalise map to be integer between 0 and 100
+    g.map.data = normalise_map(p_from_log_odds_map(g.map_data))
+    # print(g.map_data)
+    # print(g.map.data)
+    return
+
+
+def normalise_map(map):
+    """
+    Returns normalised map
+    """
+    #normalise map to be integer between 0 and 100
+    #map is a list 
+    for i in range(len(map)):
+        for j in range(len(map[i])):
+            map[i][j] = int(map[i][j]*100)
+
+    return map.flatten().astype(np.int8)
+
+    ########### breshman algorithm ############
+def bresenham_line_algo(x1,y1,x2,y2):
+    """
+    Returns all cells between two points
+    """
+    cells = np.array([])
+    #get all cells between two points
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+    x, y = x1, y1
+    sx = -1 if x1 > x2 else 1
+    sy = -1 if y1 > y2 else 1
+    if dx > dy:
+        err = dx / 2.0
+        while x != x2:
+            np.append(cells,(x, y))
+            err -= dy
+            if err < 0:
+                y += sy
+                err += dx
+            x += sx
+    else:
+        err = dy / 2.0
+        while y != y2:
+            np.append(cells,(x, y))
+            err -= dx
+            if err < 0:
+                x += sx
+                err += dy
+            y += sy
+    np.append(cells,(x, y))
+    return cells
 
