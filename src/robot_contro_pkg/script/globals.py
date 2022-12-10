@@ -9,18 +9,19 @@ from nav_msgs.msg import Odometry
 
 
 def init():
+    width , height , resolution = 400,400,0.08
     # define the global variables
     global metadata
     origin =  Odometry()
-    origin.pose.pose.position.x = -int(100*0.1)
-    origin.pose.pose.position.y = -int(100*0.1)
+    origin.pose.pose.position.x = -int(width/2*resolution)
+    origin.pose.pose.position.y = -int(height/2*resolution)
     origin.pose.pose.position.z = 0
     origin.pose.pose.orientation.x = 0
     origin.pose.pose.orientation.y = 0
     origin.pose.pose.orientation.z = 0
     origin.pose.pose.orientation.w = 0
 
-    metadata = MapMetaData(resolution=0.1, width=200, height=200, origin=origin.pose.pose)
+    metadata = MapMetaData(resolution=resolution, width=width, height=height, origin=origin.pose.pose)
     global map
     map = OccupancyGrid(info=metadata,data=np.full((metadata.width*metadata.height),-1.0))
     map.header.frame_id = "robot_map"

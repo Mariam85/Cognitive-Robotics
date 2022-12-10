@@ -24,27 +24,21 @@ def ThetaFromOdom(odom):
     Get theta from Odometry
     """
     orientations = odom.pose.pose.orientation
-    theta = ThetaFromQuant(orientations)
+    theta = ThetaFromQuant(orientations) 
     return theta
 
 #convert x and y to map coordinates
 def convert_to_map(x,y):
-    x = int(x/g.metadata.resolution)
-    y = int(y/g.metadata.resolution)
-
-    origin_x = int(g.metadata.height/2 - y)
-    origin_y = int(g.metadata.width/2 + x)
+    # x = int(x/g.metadata.resolution)
+    # y = int(y/g.metadata.resolution)
+    origin_x = int(g.metadata.height/2 - y/g.metadata.resolution)
+    origin_y = int(g.metadata.width/2 + x/g.metadata.resolution)
      
     return origin_x,origin_y
 
 def convert_to_map_array(xs,ys):
-    xs = xs/g.metadata.resolution
-    ys = ys/g.metadata.resolution
-    xs = xs.astype(int)
-    ys = ys.astype(int)
-    origin_xs = (g.metadata.height/2 - ys).astype(int)
-    origin_ys = (g.metadata.width/2 + xs).astype(int)
-
+    origin_xs = (g.metadata.height/2 - ys/g.metadata.resolution).astype(int)
+    origin_ys = (g.metadata.width/2 + xs/g.metadata.resolution).astype(int)
     return origin_xs,origin_ys
 
 #convert map coordinates to x and y
@@ -73,7 +67,8 @@ def get_laser_measuremts(laser_data):
         #discard above max or below min
         distance = laser_data.range_max if distance > laser_data.range_max else (laser_data.range_min if distance < laser_data.range_min else distance)
         distances = np.append(distances,distance)
-        thetas = np.append(thetas,laser_data.angle_min + i*laser_data.angle_increment)
+        #in radians
+        thetas = np.append(thetas,i*laser_data.angle_increment)
     return distances,thetas
 
 
@@ -194,31 +189,23 @@ def bresenham_line_algo(x1,y1,x2,y2):
     """
     Returns all cells between two points
     """
-    cells = np.array([])
-    #get all cells between two points
-    dx = abs(x2 - x1)
-    dy = abs(y2 - y1)
-    x, y = x1, y1
-    sx = -1 if x1 > x2 else 1
-    sy = -1 if y1 > y2 else 1
-    if dx > dy:
-        err = dx / 2.0
-        while x != x2:
-            np.append(cells,(x, y))
-            err -= dy
-            if err < 0:
-                y += sy
-                err += dx
-            x += sx
-    else:
-        err = dy / 2.0
-        while y != y2:
-            np.append(cells,(x, y))
-            err -= dx
-            if err < 0:
-                x += sx
-                err += dy
-            y += sy
-    np.append(cells,(x, y))
+    #x is row, y is col
+    cells = []
+    #get all cells between laser scan and robot
+    dx = abs(x2-x1)
+    dy = abs(y2-y1)
+    sx = 1 if x1 < x2 else -1
+    sy = 1 if y1 < y2 else -1
+    err = dx-dy
+    while True:
+        cells.append((x1,y1))
+        if x1 == x2 and y1 == y2:
+            break
+        e2 = 2*err
+        if e2 > -dy:
+            err = err - dy
+            x1 = x1 + sx
+        if e2 < dx:
+            err = err + dx
+            y1 = y1 + sy
     return cells
-
