@@ -9,7 +9,7 @@ from nav_msgs.msg import OccupancyGrid
 import globals as g
 
 #publish new map data to map_topic
-pub = rospy.Publisher('/map_topic',OccupancyGrid,queue_size = 100)
+pub = rospy.Publisher('/map_topic',OccupancyGrid,queue_size = 5)
 
 def mapping_callback(data):
     print("mapping")
@@ -46,7 +46,8 @@ def main():
     #initialize global variables
     g.init()
     #subscribe to sensor topic
-    rospy.Subscriber("/sensors_topic", SensorSync, mapping_callback)
+    #buffer = size of SensorSync 
+    rospy.Subscriber("/sensors_topic", SensorSync, mapping_callback,queue_size=1,buff_size=2**24)
     #spin
     rospy.spin()
 

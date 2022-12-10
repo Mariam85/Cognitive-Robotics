@@ -198,9 +198,9 @@ def bresenham_line_algo(x1,y1,x2,y2):
     sy = 1 if y1 < y2 else -1
     err = dx-dy
     while True:
-        cells.append((x1,y1))
         if x1 == x2 and y1 == y2:
             break
+        cells.append((x1,y1))
         e2 = 2*err
         if e2 > -dy:
             err = err - dy

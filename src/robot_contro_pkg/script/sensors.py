@@ -10,7 +10,7 @@ from robot_contro_pkg.msg import SensorSync
 
 global pub
 # Assign node as a publisher to this topic
-pub = rospy.Publisher('/sensors_topic',SensorSync,queue_size = 100)
+pub = rospy.Publisher('/sensors_topic',SensorSync,queue_size = 1)
 
 def Odomlaser_callback(msg_f,msg_r,msg_o):
         msg = SensorSync()
