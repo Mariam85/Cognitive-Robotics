@@ -88,8 +88,23 @@ def get_sensor_data_as_xy(x,y,theta,distances,thetas):
     xs = np.array([])
     ys = np.array([])
     for i in range(len(distances)):
-        x1 = x + distances[i]*np.cos(thetas[i]+theta)
-        y1 = y + distances[i]*np.sin(thetas[i]+theta)
+        #find acute angle
+        acute = theta + thetas[i] - np.pi/2
+        #find x and y
+        x1 = x + distances[i]*np.cos(acute)
+        y1 = y + distances[i]*np.sin(acute)
+        # if acute > np.pi/2:
+        #     acute = np.pi - acute
+        #     x1 = x - distances[i]*np.cos(acute)
+        #     y1 = y + distances[i]*np.sin(acute)
+        # elif acute > np.pi:
+        #     acute = acute - np.pi
+        #     x1 = x - distances[i]*np.cos(acute)
+        #     y1 = y - distances[i]*np.sin(acute)
+        # elif acute > 3*np.pi/2:
+        #     acute = 2*np.pi - acute
+        #     x1 = x + distances[i]*np.cos(acute)
+        #     y1 = y - distances[i]*np.sin(acute)
         xs = np.append(xs,x1)
         ys = np.append(ys,y1)
     return xs,ys

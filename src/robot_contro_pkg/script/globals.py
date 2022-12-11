@@ -9,12 +9,12 @@ from nav_msgs.msg import Odometry
 
 
 def init():
-    width , height , resolution = 400,400,0.05
+    width , height , resolution = 400,400,0.06
     # define the global variables
     global metadata
     origin =  Odometry()
-    origin.pose.pose.position.x = -int(width/2*resolution)
-    origin.pose.pose.position.y = -int(height/2*resolution)
+    origin.pose.pose.position.x = -int((width/2)*resolution)
+    origin.pose.pose.position.y = -int((height/2)*resolution)
     origin.pose.pose.position.z = 0
     origin.pose.pose.orientation.x = 0
     origin.pose.pose.orientation.y = 0

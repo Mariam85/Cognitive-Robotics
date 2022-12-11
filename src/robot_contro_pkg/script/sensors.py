@@ -26,13 +26,16 @@ def Odomlaser_callback(msg_f,msg_r,msg_o):
         msg.range_min = msg_f.range_min
         msg.range_max = msg_f.range_max
 
+        #take 360 degree scan from front and rear laser
+        msg.ranges[0:540]=msg_f.ranges
+        msg.ranges[540:720]=msg_r.ranges[180:360]
         #msg.ranges [0:90]=msg_f.ranges[0:90]
         #msg.ranges[270:360]= msg_f.ranges[45:135]
         #msg.ranges[90:270]=msg_r.ranges[45:135]
 
-        msg.ranges[0:360]=msg_f.ranges[0:360]
-        msg.ranges[360:720]=msg_r.ranges[180:540]
-
+        # msg.ranges[0:360]=msg_f.ranges[0:360]
+        # msg.ranges[360:720]=msg_r.ranges[180:540]
+        
         msg.intensities = msg_f.intensities
 
         # Broadcast the message to the topic hi_sender
