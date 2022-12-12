@@ -23,7 +23,7 @@ def init():
 
     metadata = MapMetaData(resolution=resolution, width=width, height=height, origin=origin.pose.pose)
     global map
-    map = OccupancyGrid(info=metadata,data=np.full((metadata.width*metadata.height),-1.0))
+    map = OccupancyGrid(info=metadata,data=np.full((metadata.width*metadata.height),-1.0).flatten().astype(np.int8))
     map.header.frame_id = "robot_map"
     global map_data
     #2d array of the map
@@ -33,4 +33,7 @@ def init():
     global free_threshold
     occupied_threshold = 0.7
     free_threshold = 0.3
-
+    global log_odds_occ
+    global log_odds_free
+    log_odds_occ = np.log(occupied_threshold/(1-occupied_threshold))
+    log_odds_free = np.log(free_threshold/(1-free_threshold))

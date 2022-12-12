@@ -20,15 +20,16 @@ def Odomlaser_callback(msg_f,msg_r,msg_o):
         msg.twist = msg_o.twist
         msg.angle_min= msg_f.angle_min
         msg.angle_max= msg_r.angle_max
-        msg.angle_increment = msg_f.angle_increment
-        msg.time_increment = msg_f.time_increment
+        msg.angle_increment = msg_f.angle_increment * 2
+        msg.time_increment = msg_f.time_increment * 2 
         msg.scan_time = msg_f.scan_time
         msg.range_min = msg_f.range_min
         msg.range_max = msg_f.range_max
 
         #take 360 degree scan from front and rear laser
-        msg.ranges[0:540]=msg_f.ranges
-        msg.ranges[540:720]=msg_r.ranges[180:360]
+        #take only even ranges from the front. 0,2,4,6,.... and so on
+        msg.ranges[0:270]=msg_f.ranges [0:540:2]
+        msg.ranges[270:360]=msg_r.ranges[180:360:2]
         #msg.ranges [0:90]=msg_f.ranges[0:90]
         #msg.ranges[270:360]= msg_f.ranges[45:135]
         #msg.ranges[90:270]=msg_r.ranges[45:135]

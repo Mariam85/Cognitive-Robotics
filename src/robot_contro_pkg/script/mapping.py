@@ -19,10 +19,10 @@ def mapping_callback(data):
     #theta: theta of robot (yaw)
     #distances: distances of laser scans
     #angles: angles of laser scans
-    x,y,theta,distances,angles = get_sensor_data(data)
-
     #instead of distances per laser scan, get the x and y coordinates of the laser hits
-    xs,ys = get_sensor_data_as_xy(x,y,theta,distances,angles)
+    x,y,xs,ys = get_sensor_data(data)
+
+    # xs,ys = get_sensor_data_as_xy(x,y,theta,distances,angles)
     
     #convert x and y to map coordinates (discretization)
     #x1 and y1 are the map coordinates of the robot

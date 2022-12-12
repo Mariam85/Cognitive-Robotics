@@ -56,20 +56,30 @@ def get_pose(odom_data):
     theta = ThetaFromOdom(odom_data)
     return x,y,theta
 
-def get_laser_measuremts(laser_data):
+def get_laser_measuremts(laser_data, robot, robot_theta ):
     """
     Returns distances and thier crossponding thetas per laser scan
     """
-    distances = np.array([])
-    thetas = np.array([])
+    #for each laser scan get x and y
+    xs = np.array([])
+    ys = np.array([])
+
     for i in range(len(laser_data.ranges)):
         distance = laser_data.ranges[i]
         #discard above max or below min
         distance = laser_data.range_max if distance > laser_data.range_max else (laser_data.range_min if distance < laser_data.range_min else distance)
-        distances = np.append(distances,distance)
-        #in radians
-        thetas = np.append(thetas,i*laser_data.angle_increment)
-    return distances,thetas
+        theta = i*laser_data.angle_increment
+
+        #find x and y
+        #find acute angle
+        acute = robot_theta + theta - np.pi/2
+        #find x and y
+        x1 = robot.x + distance*np.cos(acute)
+        y1 = robot.y + distance*np.sin(acute)
+        xs = np.append(xs,x1)
+        ys = np.append(ys,y1)
+
+    return xs,ys
 
 
 def get_sensor_data(data):
@@ -77,8 +87,8 @@ def get_sensor_data(data):
     Returns odometry and laser scan data
     """
     x,y,theta = get_pose(data)
-    distances,thetas = get_laser_measuremts(data)
-    return x,y,theta,distances,thetas
+    xs,ys = get_laser_measuremts(data,data.pose.pose.position,theta)
+    return x,y,xs,ys
 
 def get_sensor_data_as_xy(x,y,theta,distances,thetas):
     """
@@ -169,7 +179,8 @@ def update_map(x1,y1,xs,ys):
         #set cell to occupied
         if x2 >= 0 and x2 < g.metadata.height and y2 >= 0 and y2 < g.metadata.width:
             # print(log_odds(g.occupied_threshold))
-            g.map_data[x2][y2] += log_odds(g.occupied_threshold)
+            g.map_data[x2][y2] += g.log_odds_occ
+            g.map.data[x2*g.metadata.width + y2] = int(p_from_log_odds(g.map_data[x2][y2]) * 100)
             # print(g.map_data[x2][y2])
         for cell in cells:
             x = cell[0]
@@ -178,10 +189,12 @@ def update_map(x1,y1,xs,ys):
             if x < 0 or x >= g.metadata.height or y < 0 or y >= g.metadata.width:
                 continue
             #set cell to free
-            g.map_data[x][y] += log_odds(g.free_threshold)
-    
+            g.map_data[x][y] += g.log_odds_free
+            # print(int(p_from_log_odds(g.map_data[x][y]) * 100))
+            g.map.data[x*g.metadata.width + y] = int(p_from_log_odds(g.map_data[x][y]) * 100)
+            # print(g.map_data[x][y])
     #normalise map to be integer between 0 and 100
-    g.map.data = normalise_map(p_from_log_odds_map(g.map_data))
+    # g.map.data = normalise_map(p_from_log_odds_map(g.map_data))
     # print(g.map_data)
     # print(g.map.data)
     return
