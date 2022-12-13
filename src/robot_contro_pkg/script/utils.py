@@ -6,6 +6,7 @@ import numpy as np
 #import the created globals file
 import globals as g
 
+
 #########################   SENSOR UTILS    ############################################
 
 def ThetaFromQuant(orientations):
@@ -72,10 +73,10 @@ def get_laser_measuremts(laser_data, robot, robot_theta ):
 
         #find x and y
         #find acute angle
-        acute = robot_theta + theta - np.pi/2
+        acute = -robot_theta + theta - np.pi/2
         #find x and y
         x1 = robot.x + distance*np.cos(acute)
-        y1 = robot.y + distance*np.sin(acute)
+        y1 = -(robot.y - distance*np.sin(acute))
         xs = np.append(xs,x1)
         ys = np.append(ys,y1)
 

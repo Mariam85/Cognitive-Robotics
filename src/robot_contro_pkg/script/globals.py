@@ -31,8 +31,8 @@ def init():
     #threshold for occupancy
     global occupied_threshold
     global free_threshold
-    occupied_threshold = 0.7
-    free_threshold = 0.3
+    occupied_threshold = 0.9
+    free_threshold = 0.45
     global log_odds_occ
     global log_odds_free
     log_odds_occ = np.log(occupied_threshold/(1-occupied_threshold))
