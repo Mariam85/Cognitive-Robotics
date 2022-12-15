@@ -1,4 +1,5 @@
 <launch>
 <node pkg="robot_contro_pkg" type="controls.py" name="controls" output="screen"></node>
-<node pkg="robot_contro_pkg" type="sensors.py" name="sensors" output="screen"></node>
+<node pkg="robot_contro_pkg" type="sensors.py" name="sensors"></node>
+<node pkg="robot_contro_pkg" type="mapping.py" name="robot"></node>
 </launch>

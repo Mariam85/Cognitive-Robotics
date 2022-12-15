@@ -55,7 +55,7 @@ def main():
     subRear = message_filters.Subscriber('/robot/rear_laser/scan', LaserScan)
     subOdom = message_filters.Subscriber('/robot/robotnik_base_control/odom', Odometry)
     
-    ts = message_filters.ApproximateTimeSynchronizer([subFront, subRear,subOdom],200,0.2,allow_headerless=False)
+    ts = message_filters.ApproximateTimeSynchronizer([subFront, subRear,subOdom],200,0.01,allow_headerless=False) #reduce 0.2
     ts.registerCallback(Odomlaser_callback)
     # Wait for messages
     rospy.spin()

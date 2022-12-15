@@ -53,7 +53,7 @@ def convert_to_xy(x,y):
 #get x , y and theta from odometry
 def get_pose(odom_data):
     x = odom_data.pose.pose.position.x
-    y = odom_data.pose.pose.position.y
+    y = - odom_data.pose.pose.position.y
     theta = ThetaFromOdom(odom_data)
     return x,y,theta
 
@@ -80,6 +80,14 @@ def get_laser_measuremts(laser_data, robot, robot_theta ):
         xs = np.append(xs,x1)
         ys = np.append(ys,y1)
 
+
+
+        # acute = -robot_theta - theta - np.pi/4 * 1.15
+        # #find x and y
+        # x1 = robot.x + distance*np.cos(acute)
+        # y1 = - (robot.y + distance*np.sin(acute))
+        # xs = np.append(xs,x1)
+        # ys = np.append(ys,y1)
     return xs,ys
 
 

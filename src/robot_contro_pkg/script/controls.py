@@ -23,7 +23,7 @@ def on_press(key):
     global s_pressed
     global d_pressed 
     letter = key.char
-    print(letter)
+    # print(letter)
     #set flag to true
     if letter == 'w' or letter == 'W':
         w_pressed = True
@@ -69,14 +69,16 @@ def main():
     listener = keyboard.Listener(on_press=on_press , on_release= on_release)
     listener.start()
 
+    print('use w a s d to control the robot')
+
     while not rospy.is_shutdown():
-        print('here')
-        print('lettter '+letter+' in while loopppp')
+        # print('here')
+        # print('lettter '+letter+' in while loopppp')
         #if keyboard.is_pressed('w') or keyboard.is_pressed('W') :
         # if letter =='w' or letter =='W' :
         if w_pressed:
             # ACCELERATE
-            print("enter acceleration")
+            # print("enter acceleration")
             if vel_msg.linear.x < maxSpeed:
                 vel_msg.linear.x += 0.01
         
