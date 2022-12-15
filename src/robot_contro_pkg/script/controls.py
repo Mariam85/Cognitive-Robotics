@@ -10,12 +10,14 @@ from geometry_msgs.msg import Twist
 letter = 'm'
 
 #flags for key presses W A S D
+#when a flag is true, the robot will move in that direction
 w_pressed = False
 a_pressed = False
 s_pressed = False
 d_pressed = False
 
 
+#when a key is pressed, set the flag to true
 def on_press(key):
     global letter
     global w_pressed    
@@ -23,7 +25,7 @@ def on_press(key):
     global s_pressed
     global d_pressed 
     letter = key.char
-    # print(letter)
+    
     #set flag to true
     if letter == 'w' or letter == 'W':
         w_pressed = True
@@ -35,7 +37,7 @@ def on_press(key):
         d_pressed = True
 
 
-
+#when a key is released, set the flag to false
 def on_release(key):
     global letter
     global w_pressed
@@ -66,65 +68,57 @@ def main():
     maxAngularSpeed = 3.1 #radians/sec
     angularSpeed_r = 0.1 #radians/sec
     
+    # Create a listener for keyboard input
     listener = keyboard.Listener(on_press=on_press , on_release= on_release)
+    #start the thread
     listener.start()
 
-    print('use w a s d to control the robot')
+    print('\n\n\n\n')
+    print('use w a s d to control the robot\n\n')
+
 
     while not rospy.is_shutdown():
-        # print('here')
-        # print('lettter '+letter+' in while loopppp')
-        #if keyboard.is_pressed('w') or keyboard.is_pressed('W') :
-        # if letter =='w' or letter =='W' :
+
+        # ACCELERATE
         if w_pressed:
-            # ACCELERATE
-            # print("enter acceleration")
             if vel_msg.linear.x < maxSpeed:
                 vel_msg.linear.x += 0.01
         
-        #if keyboard.is_pressed('s') or keyboard.is_pressed('S') :
-        # if letter =='s' or letter =='S' :
+        # DECELERATE
         if s_pressed:
-            # DECELERATE
             if vel_msg.linear.x > -maxSpeed:
                 vel_msg.linear.x -= 0.01
 
-        #if keyboard.is_pressed('a') or keyboard.is_pressed('A') :
-        # if letter =='a' or letter =='A' :
+        # LEFT -- anticlockwise
         if a_pressed:
-            # LEFT -- anticlockwise
             if vel_msg.angular.z < maxAngularSpeed:    
                 vel_msg.angular.z += angularSpeed_r
 
 
-        #if keyboard.is_pressed('d') or keyboard.is_pressed('D') :
-        # if letter =='d' or letter =='D' :
+        # RIGHT -- clockwise
         if d_pressed:
-            # RIGHT -- clockwise
             if vel_msg.angular.z > -maxAngularSpeed:
                 vel_msg.angular.z -= angularSpeed_r 
 
 
-        #if not (keyboard.is_pressed('w') or keyboard.is_pressed('W')) and not (keyboard.is_pressed('s') or keyboard.is_pressed('S')):
-        # if not(letter =='w' or letter =='W') and not(letter == 's' or letter == 'S') :
+
+        # DECELERATE velocity WITH TIME PASSING 
         if not w_pressed and not s_pressed:
-            # DECELERATE WITH TIME PASSING 
             if vel_msg.linear.x > 0:
                 vel_msg.linear.x -= 0.001
             elif vel_msg.linear.x < 0:
                 vel_msg.linear.x += 0.001
             
 
-        # if not(letter =='a' or letter =='A') and not(letter == 'd' or letter == 'D') :
+        # DECELERATE angular vel WITH TIME PASSING
         if not a_pressed and not d_pressed:
             vel_msg.angular.z = 0
-            # DECELERATE WITH TIME PASSING
             if vel_msg.angular.z > 0:
                 vel_msg.angular.z -= 0.001
             elif vel_msg.angular.z < 0:
                 vel_msg.angular.z += 0.001
 
-
+        #publish the custom message to the topic
         pub.publish(vel_msg)
 
 if __name__ == '__main__':

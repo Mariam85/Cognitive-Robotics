@@ -12,25 +12,22 @@ import globals as g
 pub = rospy.Publisher('/map_topic',OccupancyGrid,queue_size = 5)
 
 def mapping_callback(data):
-    print("mapping")
+
     #get sensor data
-    #x: x position of robot
-    #y: y position of robot
-    #theta: theta of robot (yaw)
-    #distances: distances of laser scans
-    #angles: angles of laser scans
-    #instead of distances per laser scan, get the x and y coordinates of the laser hits
+    #x: x position of robot relative to world
+    #y: y position of robot relative to world
+    #xs: x positions of laser scans relative world
+    #ys: y positions of laser scans relative world
     x,y,xs,ys = get_sensor_data(data)
 
-    # xs,ys = get_sensor_data_as_xy(x,y,theta,distances,angles)
-    
-    #convert x and y to map coordinates (discretization)
-    #x1 and y1 are the map coordinates of the robot
+    #convert x,y to map coordinates
+    #x1,y1 are the map coordinates of the robot
     x1,y1 = convert_to_map(x,y)
-    #xs and ys are the map coordinates of the laser scans
+    #convert xs,ys to map coordinates
+    #xs,ys are the map coordinates of the laser scans
     xs,ys = convert_to_map_array(xs,ys)
 
-    #update map
+    #update map using sensor data and robot position
     update_map(x1,y1,xs,ys)  
 
     #publish map

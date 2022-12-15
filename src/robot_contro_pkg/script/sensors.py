@@ -13,13 +13,18 @@ global pub
 pub = rospy.Publisher('/sensors_topic',SensorSync,queue_size = 1)
 
 def Odomlaser_callback(msg_f,msg_r,msg_o):
+        #create custom message
         msg = SensorSync()
+        #get time to be used in header for synchronization
         start = Time.now()
+        #set header time stamp
         msg.header.stamp = start
+        #set pose, twist, angle_min, angle_max, angle_increment, time_increment, scan_time, range_min, range_max
         msg.pose = msg_o.pose
         msg.twist = msg_o.twist
         msg.angle_min= msg_f.angle_min
         msg.angle_max= msg_r.angle_max
+        #twice the angle increment because we are taking only 360 degree scan
         msg.angle_increment = msg_f.angle_increment * 2
         msg.time_increment = msg_f.time_increment * 2 
         msg.scan_time = msg_f.scan_time
@@ -27,23 +32,17 @@ def Odomlaser_callback(msg_f,msg_r,msg_o):
         msg.range_max = msg_f.range_max
 
         #take 360 degree scan from front and rear laser
-        #take only even ranges from the front. 0,2,4,6,.... and so on
+        #take all the ranges from front laser
         msg.ranges[0:270]=msg_f.ranges [0:540:2]
+        #take the remaining ranges from rear laser, from 180 to 360
+        #discard the first 180 ranges from rear laser and the last 180
         msg.ranges[270:360]=msg_r.ranges[180:360:2]
-        #msg.ranges [0:90]=msg_f.ranges[0:90]
-        #msg.ranges[270:360]= msg_f.ranges[45:135]
-        #msg.ranges[90:270]=msg_r.ranges[45:135]
-
-        # msg.ranges[0:360]=msg_f.ranges[0:360]
-        # msg.ranges[360:720]=msg_r.ranges[180:540]
-        
+        #take all the intensities from front laser
         msg.intensities = msg_f.intensities
 
-        # Broadcast the message to the topic hi_sender
+        # Broadcast the message to the custom topic 
         pub.publish(msg)
-        print('msg sent')
-
-
+        # print('msg sent')
 
 def main():
     # Initialize Node with node name
@@ -55,6 +54,7 @@ def main():
     subRear = message_filters.Subscriber('/robot/rear_laser/scan', LaserScan)
     subOdom = message_filters.Subscriber('/robot/robotnik_base_control/odom', Odometry)
     
+    # Synchronize the messages
     ts = message_filters.ApproximateTimeSynchronizer([subFront, subRear,subOdom],200,0.01,allow_headerless=False) #reduce 0.2
     ts.registerCallback(Odomlaser_callback)
     # Wait for messages
