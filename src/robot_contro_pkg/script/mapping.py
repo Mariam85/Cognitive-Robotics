@@ -18,15 +18,20 @@ def mapping_callback(data):
     #y: y position of robot relative to world
     #xs: x positions of laser scans relative world
     #ys: y positions of laser scans relative world
-    x,y,xs,ys = get_sensor_data(data)
+    x,y,xs,ys,theta = get_sensor_data(data)
+
+    cov = data.pose.pose.covariance
+
+    mean_corrected, cov_corrected = correction_EKF(x, y,theta,cov,xs,ys,data.ranges)
 
     #convert x,y to map coordinates
     #x1,y1 are the map coordinates of the robot
-    x1,y1 = convert_to_map(x,y)
+    x1,y1 = convert_to_map(mean_corrected[0],mean_corrected[1])
     #convert xs,ys to map coordinates
     #xs,ys are the map coordinates of the laser scans
     xs,ys = convert_to_map_array(xs,ys)
 
+    
     #update map using sensor data and robot position
     update_map(x1,y1,xs,ys)  
 
