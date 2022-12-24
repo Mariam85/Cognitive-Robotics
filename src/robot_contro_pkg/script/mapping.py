@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-from robot_control_pkg.msg import SensorSync
+from robot_contro_pkg.msg import SensorSync
 from prediction import prediction_stage
 
 from utils import *
