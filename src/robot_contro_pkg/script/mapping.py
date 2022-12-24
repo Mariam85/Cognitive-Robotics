@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 from robot_contro_pkg.msg import SensorSync
+from prediction import prediction_stage
 
 from utils import *
 #import occupancy grid and occupancy grid metadata
@@ -13,12 +14,35 @@ pub = rospy.Publisher('/map_topic',OccupancyGrid,queue_size = 5)
 
 def mapping_callback(data):
 
+
+    #predict robot position
+    #x: x position of robot relative to world
+    #y: y position of robot relative to world
+    #theta: orientation of robot relative to world
+    predictedState , predictionCovar = prediction_stage(data.twist.twist,data)
+
     #get sensor data
     #x: x position of robot relative to world
     #y: y position of robot relative to world
     #xs: x positions of laser scans relative world
     #ys: y positions of laser scans relative world
+    # x,y,xs,ys = get_sensor_data(data)
+
+    #calculate quaternion from theta
+    x,y,z,w =quaternion_from_euler(0,0,predictedState[2])
+    data.pose.pose.orientation.x = x
+    data.pose.pose.orientation.y = y
+    data.pose.pose.orientation.z = z
+    data.pose.pose.orientation.w = w
+
     x,y,xs,ys = get_sensor_data(data)
+
+    x = predictedState[0]
+    y = -predictedState[1]
+
+    # cov = data.pose.covariance
+
+    # mean_corrected, cov_corrected = correction_EKF(x, y,theta,cov,xs,ys,data.ranges)
 
     #convert x,y to map coordinates
     #x1,y1 are the map coordinates of the robot
@@ -44,6 +68,9 @@ def main():
     g.init()
     #subscribe to sensor topic
     #buffer = size of SensorSync 
+
+    #sync
+
     rospy.Subscriber("/sensors_topic", SensorSync, mapping_callback,queue_size=1,buff_size=2**24)
     #spin
     rospy.spin()

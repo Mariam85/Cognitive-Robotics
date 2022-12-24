@@ -61,6 +61,7 @@ def prediction_stage(vel, odom):
     M = np.array([[0.1, 0],
                     [0, 0.1]])
     robot_state, covar = prediction(robot_state, robot_u, dt, covar, M)
+    return robot_state, covar
     
 
 
