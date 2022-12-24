@@ -44,3 +44,5 @@ def init():
     global log_odds_free
     log_odds_occ = np.log(occupied_threshold/(1-occupied_threshold))
     log_odds_free = np.log(free_threshold/(1-free_threshold))
+    #prediction stage variables
+    global prev_time

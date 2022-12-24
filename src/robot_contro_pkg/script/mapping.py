@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-from robot_contro_pkg.msg import SensorSync
+from robot_control_pkg.msg import SensorSync
 from prediction import prediction_stage
 
 from utils import *
@@ -66,6 +66,7 @@ def main():
     rospy.init_node('mapping', anonymous=True)
     #initialize global variables
     g.init()
+    g.prev_time = rospy.Time.now()
     #subscribe to sensor topic
     #buffer = size of SensorSync 
 

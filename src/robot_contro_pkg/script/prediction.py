@@ -6,7 +6,9 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from rospy.rostime import Time
 import utils as util
+import globals as g
 
+#g.prev_time = Time.now()
 
 def motion_model(state, u, dt):
     x, y, theta = state
@@ -50,11 +52,12 @@ def prediction(state, u, dt, covar, M):
     return g, covar
 
 def prediction_stage(vel, odom):
+    current_time = odom.header.stamp
     robot_pos = [odom.pose.pose.position.x, odom.pose.pose.position.y]
     theta = util.ThetaFromOdom(odom)
     robot_state = np.array([robot_pos[0], robot_pos[1], theta])
     robot_u = [vel.linear.x, vel.angular.z]
-    dt = 0.1
+    dt = float((current_time - g.prev_time).to_sec())
     #covar matrix, take x ,y,yaw  as 3x3 matrix from odom covariance
     covar = np.array([[odom.pose.covariance[0], odom.pose.covariance[1], odom.pose.covariance[5]],
                     [odom.pose.covariance[6], odom.pose.covariance[7], odom.pose.covariance[11]],
@@ -62,6 +65,7 @@ def prediction_stage(vel, odom):
     M = np.array([[0.1, 0],
                     [0, 0.1]])
     robot_state, covar = prediction(robot_state, robot_u, dt, covar, M)
+    g.prev_time = current_time
     return robot_state, covar
     
 
