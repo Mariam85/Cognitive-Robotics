@@ -55,9 +55,10 @@ def prediction_stage(vel, odom):
     robot_state = np.array([robot_pos[0], robot_pos[1], theta])
     robot_u = [vel.linear.x, vel.angular.z]
     dt = 0.1
-    covar = np.array([[0.1, 0, 0],
-                    [0, 0.1, 0],
-                    [0, 0, 0.1]])
+    #covar matrix, take x ,y,yaw  as 3x3 matrix from odom covariance
+    covar = np.array([[odom.pose.covariance[0], odom.pose.covariance[1], odom.pose.covariance[5]],
+                    [odom.pose.covariance[6], odom.pose.covariance[7], odom.pose.covariance[11]],
+                    [odom.pose.covariance[30], odom.pose.covariance[31], odom.pose.covariance[35]]])
     M = np.array([[0.1, 0],
                     [0, 0.1]])
     robot_state, covar = prediction(robot_state, robot_u, dt, covar, M)
