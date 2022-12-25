@@ -46,3 +46,8 @@ def init():
     log_odds_free = np.log(free_threshold/(1-free_threshold))
     #prediction stage variables
     global prev_time
+
+    global distancesCorrection
+    distancesCorrection = [-1,-1]
+    global thetasCorrection
+    thetasCorrection = [-1,-1]

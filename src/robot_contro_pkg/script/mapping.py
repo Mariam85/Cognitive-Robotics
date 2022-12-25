@@ -2,6 +2,7 @@
 import rospy
 from robot_contro_pkg.msg import SensorSync
 from prediction import prediction_stage
+from correction import correction_stage
 
 from utils import *
 #import occupancy grid and occupancy grid metadata
@@ -21,21 +22,6 @@ def mapping_callback(data):
     #theta: orientation of robot relative to world
     predictedState , predictionCovar = prediction_stage(data.twist.twist,data)
 
-    #get sensor data
-    #x: x position of robot relative to world
-    #y: y position of robot relative to world
-    #xs: x positions of laser scans relative world
-    #ys: y positions of laser scans relative world
-    # x,y,xs,ys = get_sensor_data(data)
-
-    #calculate quaternion from theta
-    x,y,z,w =quaternion_from_euler(0,0,predictedState[2])
-    data.pose.pose.orientation.x = x
-    data.pose.pose.orientation.y = y
-    data.pose.pose.orientation.z = z
-    data.pose.pose.orientation.w = w
-
-    x,y,xs,ys = get_sensor_data(data)
 
     x = predictedState[0]
     y = -predictedState[1]
@@ -43,7 +29,26 @@ def mapping_callback(data):
     # cov = data.pose.covariance
 
     # mean_corrected, cov_corrected = correction_EKF(x, y,theta,cov,xs,ys,data.ranges)
+    theta = predictedState[2]
+    x,y,theta = correction_stage(x,y,theta,data,predictionCovar)
 
+    #get sensor data
+    #x: x position of robot relative to world
+    #y: y position of robot relative to world
+    #xs: x positions of laser scans relative world
+    #ys: y positions of laser scans relative world
+    # x,y,xs,ys = get_sensor_data(data)
+    data.pose.pose.position.x = x
+    data.pose.pose.position.y = -y
+    quaternion = quaternion_from_euler(0, 0, theta)
+    data.pose.pose.orientation.x = quaternion[0]
+    data.pose.pose.orientation.y = quaternion[1]
+    data.pose.pose.orientation.z = quaternion[2]
+    data.pose.pose.orientation.w = quaternion[3]
+    _,_,xs,ys = get_sensor_data(data)#,x,y,theta)
+
+
+    
     #convert x,y to map coordinates
     #x1,y1 are the map coordinates of the robot
     x1,y1 = convert_to_map(x,y)

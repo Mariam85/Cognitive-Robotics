@@ -64,7 +64,7 @@ def main():
     # Get the current time in seconds
     start = Time.now().to_sec()
     vel_msg = Twist()
-    maxSpeed = 5
+    maxSpeed = 3
     maxAngularSpeed = 3.1 #radians/sec
     angularSpeed_r = 0.1 #radians/sec
     
