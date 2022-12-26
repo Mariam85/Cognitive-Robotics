@@ -21,6 +21,8 @@ def motion_model(state, u, dt):
         x += -v/w * np.sin(theta) + v/w * np.sin(theta + w*dt)
         y += v/w * np.cos(theta) - v/w * np.cos(theta + w*dt)
         theta += w*dt
+
+    print("v: ", v)
     return np.array([x, y, theta])
 
 
@@ -53,33 +55,22 @@ def prediction(state, u, dt, covar, M):
 
 def prediction_stage(vel, odom):
     current_time = odom.header.stamp
-    robot_pos = [odom.pose.pose.position.x, odom.pose.pose.position.y]
+    # robot_pos = [odom.pose.pose.position.x, odom.pose.pose.position.y]
+    robot_pos = [g.rx,g.ry]
+    print("robot pos: ", robot_pos)
+    print("odom pos: ", odom.pose.pose.position.x, odom.pose.pose.position.y)
     theta = util.ThetaFromOdom(odom)
     robot_state = np.array([robot_pos[0], robot_pos[1], theta])
     robot_u = [vel.linear.x, vel.angular.z]
-    dt = float((current_time - g.prev_time).to_sec())/100 #TODO: Check after correction step 
+    dt = float((current_time - g.prev_time).to_sec()) #TODO: Check after correction step 
     #covar matrix, take x ,y,yaw  as 3x3 matrix from odom covariance
     covar = np.array([[odom.pose.covariance[0], odom.pose.covariance[1], odom.pose.covariance[5]],
                     [odom.pose.covariance[6], odom.pose.covariance[7], odom.pose.covariance[11]],
                     [odom.pose.covariance[30], odom.pose.covariance[31], odom.pose.covariance[35]]])
-    M = np.array([[0.1, 0],
-                    [0, 0.1]])
+    M = np.array([[0.01, 0],
+                    [0, 0.01]])
     robot_state, covar = prediction(robot_state, robot_u, dt, covar, M)
     g.prev_time = current_time
+    # print("robot state: ", robot_state)
     return robot_state, covar
     
-
-
-def main():
-    rospy.init_node('prediction_stage', anonymous=True)
-    subVel = message_filters.Subscriber('/robot/robotnik_base_control/cmd_vel', Twist)
-    subOdom = message_filters.Subscriber('/robot/robotnik_base_control/odom', Odometry)
-    ts = message_filters.ApproximateTimeSynchronizer([subVel, subOdom], 10, 0.1, allow_headerless=True)
-    ts.registerCallback(prediction_stage)
-    rospy.spin()
-
-if __name__ == '__main__':
-    try:
-        main()
-    except rospy.ROSInterruptException:
-        pass

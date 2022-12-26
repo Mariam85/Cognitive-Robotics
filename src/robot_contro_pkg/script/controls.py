@@ -60,12 +60,12 @@ def main():
     # Initialize Node with node name
     rospy.init_node('controls')
     # Assign node as a publisher to this topic
-    pub = rospy.Publisher('/robot/robotnik_base_control/cmd_vel', Twist, queue_size=100)
+    pub = rospy.Publisher('/robot/robotnik_base_control/cmd_vel', Twist, queue_size=1)
     # Get the current time in seconds
     start = Time.now().to_sec()
     vel_msg = Twist()
-    maxSpeed = 3
-    maxAngularSpeed = 3.1 #radians/sec
+    maxSpeed = 1
+    maxAngularSpeed = 1 #radians/sec
     angularSpeed_r = 0.1 #radians/sec
     
     # Create a listener for keyboard input
@@ -108,6 +108,9 @@ def main():
                 vel_msg.linear.x -= 0.001
             elif vel_msg.linear.x < 0:
                 vel_msg.linear.x += 0.001
+
+            if vel_msg.linear.x < 0.01 and vel_msg.linear.x > -0.01:
+                vel_msg.linear.x = 0
             
 
         # DECELERATE angular vel WITH TIME PASSING
@@ -117,6 +120,10 @@ def main():
                 vel_msg.angular.z -= 0.001
             elif vel_msg.angular.z < 0:
                 vel_msg.angular.z += 0.001
+
+            if vel_msg.angular.z < 0.01 and vel_msg.angular.z > -0.01:
+                vel_msg.angular.z = 0
+                
 
         #publish the custom message to the topic
         pub.publish(vel_msg)

@@ -50,9 +50,9 @@ def main():
 
 
     # Assign node as a subscriber to hello topic
-    subFront = message_filters.Subscriber('/robot/front_laser/scan', LaserScan)
-    subRear = message_filters.Subscriber('/robot/rear_laser/scan', LaserScan)
-    subOdom = message_filters.Subscriber('/robot/robotnik_base_control/odom', Odometry)
+    subFront = message_filters.Subscriber('/robot/front_laser/scan', LaserScan, queue_size=1)
+    subRear = message_filters.Subscriber('/robot/rear_laser/scan', LaserScan, queue_size=1)
+    subOdom = message_filters.Subscriber('/robot/robotnik_base_control/odom', Odometry, queue_size=1)
     
     # Synchronize the messages
     ts = message_filters.ApproximateTimeSynchronizer([subFront, subRear,subOdom],200,0.01,allow_headerless=False) #reduce 0.2

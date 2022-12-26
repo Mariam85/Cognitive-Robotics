@@ -10,7 +10,7 @@ from nav_msgs.msg import Odometry
 #use this in main to initialize global variables
 def init():
     #define the map size and resolution
-    width , height , resolution = 1000,1000,0.05
+    width , height , resolution = 1000,1000,0.08
     #create map metadata with preferred resolution and size
     global metadata
     origin =  Odometry()
@@ -37,8 +37,8 @@ def init():
     #threshold for occupancy
     global occupied_threshold
     global free_threshold
-    occupied_threshold = 0.9
-    free_threshold = 0.4
+    occupied_threshold = 0.95
+    free_threshold = 0.45
     #log odds values for occupied and free
     global log_odds_occ
     global log_odds_free
@@ -51,3 +51,19 @@ def init():
     distancesCorrection = [-1,-1]
     global thetasCorrection
     thetasCorrection = [-1,-1]
+
+    global rx
+    global ry
+    global rtheta
+    rx = 0.0
+    ry = 0.0
+    rtheta = 0.0
+
+    global xsPredicted
+    global ysPredicted
+    #xs predicted is 360 long
+    # ys predicted is 360 long
+    xsPredicted = np.zeros(360)
+    ysPredicted = np.zeros(360)
+    global predicted_measurements
+    predicted_measurements = np.full((360),-1.0) 

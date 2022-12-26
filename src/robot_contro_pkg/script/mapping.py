@@ -16,12 +16,23 @@ pub = rospy.Publisher('/map_topic',OccupancyGrid,queue_size = 5)
 def mapping_callback(data):
 
 
+    #print how much time each stage takes
+        
+
     #predict robot position
     #x: x position of robot relative to world
     #y: y position of robot relative to world
     #theta: orientation of robot relative to world
-    predictedState , predictionCovar = prediction_stage(data.twist.twist,data)
 
+    #time before prediction stage
+    t1 = rospy.get_time()
+
+    
+    predictedState , predictionCovar = prediction_stage(data.twist.twist,data)
+    #time after prediction stage
+
+    # print("prediction stage time: ", (t2-t1))
+    
 
     x = predictedState[0]
     y = -predictedState[1]
@@ -30,14 +41,20 @@ def mapping_callback(data):
 
     # mean_corrected, cov_corrected = correction_EKF(x, y,theta,cov,xs,ys,data.ranges)
     theta = predictedState[2]
-    x,y,theta = correction_stage(x,y,theta,data,predictionCovar)
 
+
+    x,y,theta = correction_stage(x,y,theta,data,predictionCovar,data.twist.twist)
+
+
+    # print("correction stage time: ", (t2-t1))
     #get sensor data
     #x: x position of robot relative to world
     #y: y position of robot relative to world
     #xs: x positions of laser scans relative world
     #ys: y positions of laser scans relative world
     # x,y,xs,ys = get_sensor_data(data)
+
+
     data.pose.pose.position.x = x
     data.pose.pose.position.y = -y
     quaternion = quaternion_from_euler(0, 0, theta)
@@ -48,7 +65,8 @@ def mapping_callback(data):
     _,_,xs,ys = get_sensor_data(data)#,x,y,theta)
 
 
-    
+    g.rx, g.ry = x, -y
+    g.rtheta = theta
     #convert x,y to map coordinates
     #x1,y1 are the map coordinates of the robot
     x1,y1 = convert_to_map(x,y)
@@ -58,6 +76,10 @@ def mapping_callback(data):
 
     #update map using sensor data and robot position
     update_map(x1,y1,xs,ys)  
+    #time after map update
+    t2 = rospy.get_time()
+
+    print("map update time: ", (t2-t1))
 
     #publish map
     pub.publish(g.map)
